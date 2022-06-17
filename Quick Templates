@@ -1,0 +1,56 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="-1" 
+import pandas as pd
+from sqlalchemy.engine import URL
+from sqlalchemy.engine import create_engine
+connection_string = "DRIVER={ODBC Driver 17 for SQL Server};SERVER=########;DATABASE=#######;Trusted_Connection=yes"
+connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
+conn = create_engine(connection_url)
+
+
+wb=openpyxl.load_workbook(r'####')
+ws=wb['Sheet1']
+    
+#borderline
+#def set_border(WS):
+    #thin = Side(border_style="thin", color="000000")
+thin_border = Border(bottom=Side(style='thin'))
+for row in ws:
+        
+    for cell in row:
+        if len(str(cell.value)) > 0:
+            cell.border = thin_border            
+
+#set_border(ws)        
+#Creating spacing for cell with respect to length            
+for col in ws.columns:
+    max_length = 0
+    column = get_column_letter(col[0].column)  # Get the column name
+    # Since Openpyxl 2.6, the column name is  ".column_letter" as .column became the column number (1-based)
+    for cell in col:
+        try:  # Necessary to avoid error on empty cells
+            if len(str(cell.value)) > max_length:
+                max_length = len(cell.value)
+        except:
+            pass
+    adjusted_width = (max_length + 2) * 1.2
+    ws.column_dimensions[column].width = adjusted_width
+wb.save(r'######')
+
+for name, data in releted.groupby('name'):
+    line = email.loc[email['name'] == data.name.iloc[0]]
+    email=line['Email']
+    email= ''.join(email)
+    #html1 = data.to_html()
+    file = data.to_excel(r'###')
+    attach = r'###'
+    outlook = win32com.client.Dispatch('outlook.application')
+    mail_send = outlook.CreateItem(0)
+    name = data.Name.iloc[0]
+    test_email = '###'
+    mail_send.To = test_email
+    mail_send.Attachments.Add(attach)
+    mail_send.Subject = 'Rejected PO Lines '
+    body =  '</h1>Hello '+ name +'</h1>'  + 'Attached File has Deleted/Rejected PO Lines \n' + '<br><br>'+ ' This is an automated email'+ '<br><br>'+ 'Regards'+ '<br><br>'+ 'Your Bot' #+ html1 
+    mail_send.HTMLBody = (body)
+    mail_send.Send()
